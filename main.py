@@ -1,33 +1,45 @@
-import sys
+import sys, glob, os
 import matplotlib.pyplot as plt
 
 from PySide6.QtWidgets import QApplication
+from fileio import XasDatum
 
-import fileio
+from XasModel import XasModel
 
 from ui.main_window import MainWindow
 from ui.main_widget import PlotWidget
 
-from util.mdr_xafs_util import find_raw_data
+def load_mdr_xafs(dir_name) -> list:
+
+    # Make filename list of zip files in dir_name
+    l = glob.glob(dir_name + "/*.zip")
+
+    # Make XasDatum list
+    data = []
+
+    for z in l:
+        data.append(XasDatum(z))
+
+    return data
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    spectrum = fileio.XasDatum()
+    # Load MDR XAS data
+    os.chdir("data")
+    data = load_mdr_xafs(".")
 
-    path = "util/"
+    # Link data to XasModel
+    XasListModel = XasModel(data)
 
-    dname, fname = find_raw_data(path + "c247dv91k.zip")
-    print(dname, fname)
+    # XasListView = QListView()
+    # XasListView.setModel(XasListModel)
+    
+    # plot_widget = PlotWidget(data[1])
 
-    data = spectrum.from_file(path + dname + "/" + fname[0])
-    # data = spectrum.from_file("Cu-K_Cu-foil_Si311_50ms_140625.dat")
-    # data = spectrum.from_file("Pb-L21_PbTe_Si311_50ms_210210.dat")
-    # data = spectrum.from_file("rTiO2_Ti-K.dat")
-
-    plot_widget = PlotWidget(data)
-
-    main_window = MainWindow(plot_widget)
+    # main_window = MainWindow(plot_widget)
+    main_window = MainWindow(XasListModel)
     main_window.resize(800, 600)
     main_window.show()
 

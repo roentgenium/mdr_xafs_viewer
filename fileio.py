@@ -1,12 +1,6 @@
 import numpy as np
-
-
-def guess_file_type(self, fname):
-    with open(fname) as f:
-        if "9809" in f.readline():
-            return "9809"
-        else:
-            return "unknown"
+import shutil, pathlib
+import json
 
 
 def load_9809_format(self, fname):
@@ -14,7 +8,7 @@ def load_9809_format(self, fname):
     Load 9809 format XAS data into a XasDatum object.
     Only support the simplest transmission data.
     """
-    with open(fname) as f:
+    with open(fname, encoding="utf-8") as f:
         format, beamline = f.readline().strip().split(maxsplit=1)
         file_name, time = f.readline().strip().split(maxsplit=1)
         sample_name = f.readline().strip()
@@ -26,10 +20,10 @@ def load_9809_format(self, fname):
         f.readline()  # Ignore Line 9
         for i in range(blocksize):
             f.readline()  # Ignore Blocks
-        print(f.readline())  # Ignore Offset
+        f.readline()
         num_of_detector = int(f.readline().strip().split()[-1])  # Ignore detector line
         dmode = f.readline().strip().split(maxsplit=4)[:-1]
-        print(f.readline())  # Ignore Offset
+        f.readline()
         num_of_columns = len(f.readline().strip().split())
         raw = f.read().strip().split()  # Read all data
         raw = np.array(raw, dtype=float)
@@ -47,15 +41,38 @@ def load_9809_format(self, fname):
              np.sin(np.pi * self.angle_o / 180.0))
         self.mu = np.log(self.i0 / self.i1)
 
-        return self
-
 
 class XasDatum():
-    def __init__(self) -> None:
+    def __init__(self, fname):
+        self.metadata = None
+        self.rawdata = None
+        self.filepath = fname
         self.energy = []
         self.mu = []
+        self.from_file(fname)
+        self.name = self.metadata["sample"][0]["chemical_formula"]
+
+    def guess_file_format(self, fname):
+        with open(fname, encoding="utf-8") as f:
+            if "9809" in f.readline():
+                return "9809"
+            else:
+                return "unknown"
 
     def from_file(self, fname):
-        type = guess_file_type(self, fname)
+        # Unzip a zip file
+        dir_name = pathlib.Path(fname).stem
+        shutil.unpack_archive(fname, dir_name)
+
+        # Load metadata
+        fname2 = pathlib.Path(dir_name + "/" + "metadata.all.json" )
+        with open(fname2, encoding = 'utf-8') as f:
+            self.metadata = json.load(f)
+
+        # Find rawdata files
+        self.rawdata = self.metadata["local"]["xafs_filename_list"]
+
+        # Guess file format
+        type = self.guess_file_format(dir_name + "/" + self.rawdata[0])
         if type == "9809":
-            return load_9809_format(self, fname)
+            load_9809_format(self, dir_name + "/" + self.rawdata[0])

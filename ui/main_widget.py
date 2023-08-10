@@ -4,11 +4,11 @@ from PySide6.QtWidgets import QWidget, QHBoxLayout, QSizePolicy
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
 
 class PlotWidget(QWidget):
-    def __init__(self, data):
+    def __init__(self):
         QWidget.__init__(self)
 
         self.chart = QChart()
-        self.add_series("Spectrum", data)
+        # self.add_series("Spectrum", data)
 
         self.chart_view = QChartView(self.chart)
         self.chart_view.setRenderHint(QPainter.Antialiasing)
@@ -45,3 +45,6 @@ class PlotWidget(QWidget):
         self.axis_y.setTitleText("Absorption")
         self.chart.addAxis(self.axis_y, Qt.AlignLeft)
         self.series.attachAxis(self.axis_y)
+
+    def update_graph(self, data):
+        print(data)
