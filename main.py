@@ -1,20 +1,14 @@
-import sys, glob, os
-import matplotlib.pyplot as plt
+from PySide6 import QtWidgets, QtGui
 
-from PySide6.QtWidgets import QApplication
-from fileio import XasDatum
+from mainwindow import MdrXasViewer
 
-from XasModel import XasModel
+from xas_data import XasDatum
+from xas_model import XasModel
 
-from ui.main_window import MainWindow
-from ui.main_widget import PlotWidget
+import os, glob
 
 def load_mdr_xafs(dir_name) -> list:
-
-    # Make filename list of zip files in dir_name
     l = glob.glob(dir_name + "/*.zip")
-
-    # Make XasDatum list
     data = []
 
     for z in l:
@@ -22,25 +16,22 @@ def load_mdr_xafs(dir_name) -> list:
 
     return data
 
-
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
 
-    # Load MDR XAS data
     os.chdir("data")
     data = load_mdr_xafs(".")
 
-    # Link data to XasModel
-    XasListModel = XasModel(data)
+    m = XasModel()
 
-    # XasListView = QListView()
-    # XasListView.setModel(XasListModel)
-    
-    # plot_widget = PlotWidget(data[1])
+    for d in data:
+        m.add(d)
 
-    # main_window = MainWindow(plot_widget)
-    main_window = MainWindow(XasListModel)
-    main_window.resize(800, 600)
-    main_window.show()
+    mw = MdrXasViewer()
+    mw.setFont(QtGui.QFont("Arial"))
+    mw.resize(800, 600)
+    mw.set_model(m)
+    mw.show()
 
     sys.exit(app.exec())
