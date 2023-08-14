@@ -36,6 +36,9 @@ class PlotWidget(QtWidgets.QWidget):
         self.axis_y.setTitleText("Absorption (a.u.)")
         self.chart.addAxis(self.axis_y, QtCore.Qt.AlignLeft)
 
+        self.setFont(QtGui.QFont("Arial", 14))
+
+
     def add_series(self, data: XasDatum):
         self.chart.removeAllSeries()
 
@@ -43,7 +46,7 @@ class PlotWidget(QtWidgets.QWidget):
         self.series.setName(data.name)
 
         for i in range(len(data.energy)):
-            self.series.append(data.energy[i], data.mu[i])
+            self.series.append(data.energy[i], data.flat[i])
 
         self.chart.addSeries(self.series)
         self.series.attachAxis(self.axis_x)
@@ -59,10 +62,14 @@ class PlotWidget(QtWidgets.QWidget):
         pass
 
     def set_autoscale(self, data=None):
-        self.axis_x.setMin(min(data.energy))
-        self.axis_x.setMax(max(data.energy))
-        self.axis_y.setMin(min(data.mu))
-        self.axis_y.setMax(max(data.mu))
+        self.axis_x.setTickAnchor(round(data.e0, -1))
+        self.axis_x.setTickInterval(10)
+        self.axis_x.setMin(round(data.e0 - 50, 0))
+        self.axis_x.setMax(round(data.e0 + 100, 0))
+
+        self.axis_y.setMin(0)
+        self.axis_y.setMax(round(max(data.flat)+0.05,1))
+        self.axis_y.setTickInterval(0.2)
 
     def clear(self):
         self.chart.removeAxis()

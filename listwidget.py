@@ -1,4 +1,4 @@
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets,QtGui
 
 class ListWidget(QtWidgets.QListView):
     def __init__(self, parent=None):

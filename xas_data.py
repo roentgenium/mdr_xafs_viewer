@@ -9,6 +9,9 @@ class XasDatum():
         self.filepath = fname
         self.energy = []
         self.mu = []
+        self.norm = []
+        self.flat = []
+        self.e0 = None
         self.from_file(fname)
         try:
             self.name = self.metadata["sample"][0]["chemical_formula"]
@@ -40,6 +43,7 @@ class XasDatum():
 
         # Find rawdata files
         self.rawdata = self.metadata["local"]["xafs_filename_list"]
+        # print(self.rawdata, fname)
         fname3 = self.rawdata[0].replace("(", "_").replace(")", "_")
 
         # Guess file format

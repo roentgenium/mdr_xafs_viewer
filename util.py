@@ -1,5 +1,6 @@
 import numpy as np
 
+from larch import xafs, Group
 
 def load_9809_format(self, fname):
     """
@@ -38,3 +39,9 @@ def load_9809_format(self, fname):
             (2.0 * float(distance) *
              np.sin(np.pi * self.angle_o / 180.0))
         self.mu = np.log(self.i0 / self.i1)
+
+        dat = Group(energy = self.energy, mu = self.mu)
+        xafs.pre_edge(dat, group=dat)
+        self.e0 = dat.e0
+        self.norm = dat.norm
+        self.flat = dat.flat

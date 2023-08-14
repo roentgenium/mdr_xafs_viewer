@@ -13,7 +13,7 @@ from xas_data import XasDatum
 class MdrXasViewer(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(MdrXasViewer, self).__init__(parent)
-        self.setWindowTitle("MDR XAS Viewer")
+        self.setWindowTitle("MDR XAFS Viewer")
 
         self.plotwidget = PlotWidget(self)
         self.controlwidget = ControlWidget(self)
@@ -52,15 +52,11 @@ class MdrXasViewer(QtWidgets.QMainWindow):
         self.listwidget.selectionModel().selectionChanged.connect(self.replot)
 
     def replot(self, selected, deselected):
-        # print(self.listwidget.selectedIndexes())
         indexes = self.listwidget.selectedIndexes()
         data = []
+
         for i in indexes:
-            # print(i)
             data.append(self.model.get(i))
-        # print(selected)
-        # data = self.model.get(selected)
-        # self.plotwidget.add_series(data)
         for d in data:
             self.plotwidget.add_series(d)
 
