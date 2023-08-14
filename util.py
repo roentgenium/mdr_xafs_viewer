@@ -24,7 +24,11 @@ def load_9809_format(self, fname):
         dmode = f.readline().strip().split(maxsplit=4)[:-1]
         f.readline()
         num_of_columns = len(f.readline().strip().split())
-        raw = f.read().strip().split()  # Read all data
+        raw = f.read().strip().split() # Read all data
+        
+        if '\x1a' in raw[-1]: # WORKAROUND
+            del raw[-1] # \x1a byte was found, remove the last item from list
+        
         raw = np.array(raw, dtype=float)
         length = int(raw.size / num_of_columns )
         data = np.reshape(raw, [length, num_of_columns])

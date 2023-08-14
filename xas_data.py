@@ -1,4 +1,4 @@
-import pathlib, shutil, json
+import pathlib, shutil, json, os
 
 from util import load_9809_format
 
@@ -27,7 +27,7 @@ class XasDatum():
                     else:
                         return "unknown"
                 except UnicodeDecodeError:
-                    print(f"Fail to load {fname}")
+                    print(f"Fail to load {fname}") # WORKAROUND
         except IOError:
             print(f"Fail to load {fname}")
 
@@ -38,17 +38,32 @@ class XasDatum():
 
         # Load metadata
         fname2 = pathlib.Path(dir_name + "/" + "metadata.all.json" )
-        with open(fname2, encoding = 'utf-8') as f:
-            self.metadata = json.load(f)
+        if os.path.isfile(fname2):
+            with open(fname2, encoding = 'utf-8') as f:
+                self.metadata = json.load(f)
+        else:
+            fname2 = pathlib.Path(dir_name + "/" + "metadata.json" )
+            with open(fname2, encoding = 'utf-8') as f:
+                self.metadata = json.load(f)
 
-        # Find rawdata files
-        self.rawdata = self.metadata["local"]["xafs_filename_list"]
-        # print(self.rawdata, fname)
-        fname3 = self.rawdata[0].replace("(", "_").replace(")", "_")
+
+        # Find rawdata files with WORKAROUND
+        try:
+            self.rawdata = self.metadata["local"]["xafs_filename_list"]
+        except:
+            del self
+            return
+        
+        # Find xafs raw filename with WORKAROUND
+        if type(self.rawdata) == list:
+            fname3 = self.rawdata[0].replace("(", "_").replace(")", "_").replace(" ", "_")
+        else:
+            del self
+            return
 
         # Guess file format
-        type = self.guess_file_format(dir_name + "/" + fname3)
-        if type == "9809":
+        format = self.guess_file_format(dir_name + "/" + fname3)
+        if format == "9809":
             load_9809_format(self, dir_name + "/" + fname3)
 
     def toList(self) -> list:
