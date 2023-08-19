@@ -1,1 +1,1 @@
-https://mdr.nims.go.jp/catalog?f%5Bkeyword_sim%5D%5B%5D=BL14B2&locale=en&search_field=all_fields
+https://mdr.nims.go.jp/catalog?q=Cu+BL14B2
